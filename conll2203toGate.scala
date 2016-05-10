@@ -2,7 +2,7 @@ import gate._
 import java.io._
 
 val patEmpty = "^\\s*$".r
-val patNewDoc = "^\\s*-DOCSTART-\\s+-X-\\s+-X-\\s+.*$".r
+val patNewDoc = "^\\s*-DOCSTART-\\s+-X-\\s+.*$".r
 val patLine = "\\s+"
 
 val in = scala.io.Source.fromInputStream(System.in)
@@ -20,7 +20,12 @@ var nes = List[NE]()
 
 // TODO: count the NE annotations and try to sanity check them against 
 // the original data files!!
+if(args.size != 1) {
+  System.err.println("Need one parameter: the output directory path")
+  System.exit(1)
+}
 
+val outDir = new File(args(0))
 
 def saveDoc(nr: Int, content: String, tokens: List[Token], nes: List[NE]) = {
   val docName = "%05d.xml".format(nr)
@@ -52,7 +57,7 @@ def saveDoc(nr: Int, content: String, tokens: List[Token], nes: List[NE]) = {
     gate.Utils.addAnn(origs,ne.from, ne.to, ne.annType, fm)
   }
   // actually write the document 
-  gate.corpora.DocumentStaxUtils.writeDocument(doc,new File(docName))
+  gate.corpora.DocumentStaxUtils.writeDocument(doc,new File(outDir,docName))
 }
 
 Gate.init()
