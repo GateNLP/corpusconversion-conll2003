@@ -47,7 +47,9 @@ The conversion algorithm separates all tokens by spaces except there are no spac
 there are no spaces after opening parentheses ({[ and before closing parentheses )}]
 There is no space inserted before token 's but there is space inserted before a single ' because we cannot know if it is
 the genetive of a plural or just used for quoting or something other.
+For quote characters " a space is inserted before but not after all odd occurrences in a document and after but not before
+all even occurrences.
 
-All other tokens, including quote-like characters like "'`, or characters like $£#~% if separate tokens in the input file are separated by 
+All other tokens, including quote-like characters like '`, or characters like $£#~% if separate tokens in the input file are separated by 
 spaces.
 No space is added at the beginning or end of a sentence or beginning or end of a document.

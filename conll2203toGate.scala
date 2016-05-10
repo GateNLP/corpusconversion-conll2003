@@ -64,13 +64,14 @@ var lastNe = "O"
 var lastFrom = -1
 var lastTo = -1
 var lastLineNr = -1
+var quoteOpen = true 
 in.getLines.foreach { line =>
   linenr += 1
   // first check if it is an empty line. If it is then add a new line character to the document
   if(!patEmpty.findFirstIn(line).isEmpty) {
     content.append("\n");
     noSpace = true
-    lastNe = "O"
+    lastNe = "O"    
   } else if(!patNewDoc.findFirstIn(line).isEmpty) {
     // if we do have a document, write it
     if(content.size > 0) {
@@ -82,6 +83,7 @@ in.getLines.foreach { line =>
     nes = List[NE]()
     noSpace = true
     lastNe = "O"
+    quoteOpen = true
   } else { 
     // actual line with a token in it
     val fields = line.split(patLine,-1)
@@ -90,12 +92,18 @@ in.getLines.foreach { line =>
     // it must be english and the lemma is missing
     // if the current string is just punctuation or a closing parenthesis, then just append it otherwise
     // we first insert a separating space, except when the flag noSpace is set
-    if(!fields(0).matches("[.,:;\\-?!}\\])]") && !fields(0).matches("'s")) {
+    if(fields(0) != "\"" && !fields(0).matches("[.,:;\\-?!}\\])]") && !fields(0).matches("'s")) {
       if(!noSpace) {
         content.append(" ")
       } else {
         noSpace = false
       }
+    } else if (fields(0) == "\"") {
+      if(quoteOpen) {
+        content.append(" ")
+        noSpace = true
+      } 
+      quoteOpen = !quoteOpen
     }
     val from = content.size
     content.append(fields(0))
