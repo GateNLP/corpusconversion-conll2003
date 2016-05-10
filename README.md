@@ -4,7 +4,7 @@ This includes both modified scripts to do the initial merge of text and conll
 annotations (the original scripts are meant to be used with a CD mounted 
 at some specific mount point) and the conversion from CoNLL format to GATE finf.
 
-This will use the updated 2006 annotations for german
+This will use the updated 2006 annotations for German! 
 
 The script prepare.sh expects three parameters for the  locations of the following files
 First parameter for directory of
@@ -27,10 +27,10 @@ to already contain the correctly expanded files and it will be used as is.
 
 ## Steps 
 
-* run prepare.sh dir1 dir2 dir3 where dir1 contains the conll2003 archives dir2 contains the LDC94T5 archive and dir3 contains the Reuters zip files
+* run ./prepare.sh dir1 dir2 dir3 where dir1 contains the conll2003 archives dir2 contains the LDC94T5 archive and dir3 contains the Reuters zip files
 * this creates work/ner/deu.{train,testa,testb} and work/ner/eng.{train,testa,testb}
 * NOTE: there will be a message about an incorrect number of lines in data files, but it seems this is just because of an added empty line at the end of eng.testa
-* Run the convert.sh script: this will create a directory deu and a directory eng with subdirectories train, test and testb each and populate the directories with the GATE files.
+* Run ./convert.sh : this will create a directory deu and a directory eng with subdirectories train, test and testb each and populate the directories with the GATE files.
 
 Each of the result directories contains one GATE document in GATE XML format for each document identified in the corresponding input file. 
 
