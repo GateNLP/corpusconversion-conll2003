@@ -27,40 +27,13 @@ if(args.size != 1) {
 
 val outDir = new File(args(0))
 
-def saveDoc(nr: Int, content: String, tokens: List[Token], nes: List[NE]) = {
-  val docName = "%05d.xml".format(nr)
-  System.err.println("Saving document: "+docName)
-  //System.err.println("NES: "+nes)
-  val parms = Factory.newFeatureMap()
-  parms.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, "UTF-8")
-  parms.put(Document.DOCUMENT_STRING_CONTENT_PARAMETER_NAME, content)
-  parms.put(Document.DOCUMENT_MIME_TYPE_PARAMETER_NAME, "text/plain")
-  val doc = Factory.createResource("gate.corpora.DocumentImpl", parms).asInstanceOf[Document]
-  // add the tokens
-  val origs = doc.getAnnotations("Original markups")
-  tokens.foreach { token =>
-    val fm = Factory.newFeatureMap()
-    fm.put("lemma",token.lemma)
-    fm.put("pos",token.pos)
-    fm.put("chunkBIO",token.chunkBIO)
-    fm.put("neBIO",token.neBIO)
-    fm.put("lineNr",token.lineNr: java.lang.Integer)
-    gate.Utils.addAnn(origs,token.from, token.to, "Token", fm)
-  }
-  nes.foreach { ne =>
-    val fm = Factory.newFeatureMap()
-    fm.put("startLineNr",ne.startLineNr: java.lang.Integer)
-    // Sanity check
-    if(ne.startLineNr == -1) {
-      System.err.println("Got a startLineNr of -1 for ne: "+ne)
-    }
-    gate.Utils.addAnn(origs,ne.from, ne.to, ne.annType, fm)
-  }
-  // actually write the document 
-  gate.corpora.DocumentStaxUtils.writeDocument(doc,new File(outDir,docName))
-}
 
 Gate.init()
+gate.Utils.loadPlugin("Format_FastInfoset")
+val docExporter = Gate.getCreoleRegister()
+                     .get("gate.corpora.FastInfosetExporter")
+                     .getInstantiations().iterator().next()
+                     .asInstanceOf[DocumentExporter]
 
 var docNr = 0
 var linenr = 0
@@ -176,3 +149,40 @@ if(content.size > 0) {
   docNr+=1
   saveDoc(docNr,content.toString,tokens,nes)
 }
+
+
+
+def saveDoc(nr: Int, content: String, tokens: List[Token], nes: List[NE]) = {
+  val docName = "%05d.finf".format(nr)
+  System.err.println("Saving document: "+docName)
+  //System.err.println("NES: "+nes)
+  val parms = Factory.newFeatureMap()
+  parms.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, "UTF-8")
+  parms.put(Document.DOCUMENT_STRING_CONTENT_PARAMETER_NAME, content)
+  parms.put(Document.DOCUMENT_MIME_TYPE_PARAMETER_NAME, "text/plain")
+  val doc = Factory.createResource("gate.corpora.DocumentImpl", parms).asInstanceOf[Document]
+  // add the tokens
+  val origs = doc.getAnnotations("Original markups")
+  tokens.foreach { token =>
+    val fm = Factory.newFeatureMap()
+    fm.put("lemma",token.lemma)
+    fm.put("pos",token.pos)
+    fm.put("chunkBIO",token.chunkBIO)
+    fm.put("neBIO",token.neBIO)
+    fm.put("lineNr",token.lineNr: java.lang.Integer)
+    gate.Utils.addAnn(origs,token.from, token.to, "Token", fm)
+  }
+  nes.foreach { ne =>
+    val fm = Factory.newFeatureMap()
+    fm.put("startLineNr",ne.startLineNr: java.lang.Integer)
+    // Sanity check
+    if(ne.startLineNr == -1) {
+      System.err.println("Got a startLineNr of -1 for ne: "+ne)
+    }
+    gate.Utils.addAnn(origs,ne.from, ne.to, ne.annType, fm)
+  }
+  // actually write the document 
+  //gate.corpora.DocumentStaxUtils.writeDocument(doc,new File(outDir,docName))
+  docExporter.export(doc,new File(outDir, docName), Factory.newFeatureMap());
+}
+
