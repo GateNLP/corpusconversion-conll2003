@@ -25,6 +25,12 @@ not removed automatically).
 If the script prepare.sh is run and a directory work already exists it is assumed 
 to already contain the correctly expanded files and it will be used as is.
 
+## Requirements
+
+* Needs Java and Scala installed
+* Needs GATE 8.4.x installed and the environment variable `GATE_HOME` set to the installation directory
+* Only works on Linux, Mac and under Windows probably only in some form of Linux-compatibiity mode
+
 ## Steps 
 
 * run ./prepare.sh dir1 dir2 dir3 where dir1 contains the conll2003 archives dir2 contains the LDC94T5 archive and dir3 contains the Reuters zip files

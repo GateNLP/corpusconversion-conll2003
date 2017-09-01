@@ -17,16 +17,16 @@ mkdir -p conll2003-gate/eng/testb
 
 
 iconv -f iso-8859-1 -t utf-8  work/ner/deu.train | \
-  scala -cp ${GATE_HOME}/bin/gate.jar:${GATE_HOME}/lib/'*' conll2203toGate.scala conll2003-gate/deu/train
+  scala -cp ${GATE_HOME}/bin/gate.jar:${GATE_HOME}/lib/'*' conll2003toGate.scala conll2003-gate/deu/train
 iconv -f iso-8859-1 -t utf-8  work/ner/deu.testa | \
-  scala -cp ${GATE_HOME}/bin/gate.jar:${GATE_HOME}/lib/'*' conll2203toGate.scala conll2003-gate/deu/testa
+  scala -cp ${GATE_HOME}/bin/gate.jar:${GATE_HOME}/lib/'*' conll2003toGate.scala conll2003-gate/deu/testa
 iconv -f iso-8859-1 -t utf-8  work/ner/deu.testb | \
-  scala -cp ${GATE_HOME}/bin/gate.jar:${GATE_HOME}/lib/'*' conll2203toGate.scala conll2003-gate/deu/testb
+  scala -cp ${GATE_HOME}/bin/gate.jar:${GATE_HOME}/lib/'*' conll2003toGate.scala conll2003-gate/deu/testb
 
 iconv -f iso-8859-1 -t utf-8  work/ner/eng.train | \
-  scala -cp ${GATE_HOME}/bin/gate.jar:${GATE_HOME}/lib/'*' conll2203toGate.scala conll2003-gate/eng/train
+  scala -cp ${GATE_HOME}/bin/gate.jar:${GATE_HOME}/lib/'*' conll2003toGate.scala conll2003-gate/eng/train
 iconv -f iso-8859-1 -t utf-8  work/ner/eng.testa | \
-  scala -cp ${GATE_HOME}/bin/gate.jar:${GATE_HOME}/lib/'*' conll2203toGate.scala conll2003-gate/eng/testa
+  scala -cp ${GATE_HOME}/bin/gate.jar:${GATE_HOME}/lib/'*' conll2003toGate.scala conll2003-gate/eng/testa
 iconv -f iso-8859-1 -t utf-8  work/ner/eng.testb | \
-  scala -cp ${GATE_HOME}/bin/gate.jar:${GATE_HOME}/lib/'*' conll2203toGate.scala conll2003-gate/eng/testb
+  scala -cp ${GATE_HOME}/bin/gate.jar:${GATE_HOME}/lib/'*' conll2003toGate.scala conll2003-gate/eng/testb
 
