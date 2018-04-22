@@ -1,10 +1,16 @@
 # Tools to convert the CoNLL2003 NER corpora to GATE format
 
-This includes both modified scripts to do the initial merge of text and conll
-annotations (the original scripts are meant to be used with a CD mounted 
-at some specific mount point) and the conversion from CoNLL format to GATE finf.
+This repository contains two sets of scripts for creating the Conll2003 NER corpora
+in GATE format: 
+* prepare-deu.sh and prepare-eng.sh to create the conll-format files from
+  the text corpora (licensed, need to get obtained separately) and the annotation files 
+  (available from https://www.clips.uantwerpen.be/conll2003/ner/)
+* convert-deu.sh and convert-eng.sh to convert the conll-format files to GATE format.
 
-This will use the updated 2006 annotations for German! 
+NOTE: the prepare-deu.sh script does not work correctly at the moment and cannot be 
+used, so the german conll-format files must get created by you separately and then
+be put into directory ./conll2003-deu.
+
 
 The script prepare.sh expects three parameters for the  locations of the following files
 First parameter for directory of
