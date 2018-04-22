@@ -1,7 +1,7 @@
 # Tools to convert the CoNLL2003 NER corpora to GATE format
 
 This repository contains two sets of scripts for creating the Conll2003 NER corpora
-in GATE format: 
+in GATE FastInfoset format: 
 * prepare-deu.sh and prepare-eng.sh to create the conll-format files from
   the text corpora (licensed, need to get obtained separately) and the annotation files 
   (available from https://www.clips.uantwerpen.be/conll2003/ner/)
@@ -11,40 +11,32 @@ NOTE: the prepare-deu.sh script does not work correctly at the moment and cannot
 used, so the german conll-format files must get created by you separately and then
 be put into directory ./conll2003-deu.
 
+## Preparing the CONLL-format files
 
-The script prepare.sh expects three parameters for the  locations of the following files
-First parameter for directory of
-* ner.tgz from CoNLL 2003
-* eng.raw.tar from CoNLL 2003
-* deu.raw.tar from CoNLL 2003
-Second parameter for directory of
-* LDC94T5.tgz for the actual texts
-Third parameter for directory of
-* Reuters files <date>.zip
+Create the English conll2003-format files by running `./prepare-eng.sh <conllloc> <reutersloc>`
+* `<conllloc>` is the directory that contains the downloaded ner.tgz file
+* `<retersloc>` is the directory that contains all the zip files of the Reuters corpus
 
-The tools will extract from these original locations into ./work 
-and then processing will use the files in there, so there must be
-enough disk space to temporarily hold all the files in ./work.
-After the conversion is completed, ./work can be removed (but it is
-not removed automatically).
+This should place the three files eng.train, eng.testa and eng.tesb into the 
+./conll2003-eng directory.
 
-If the script prepare.sh is run and a directory work already exists it is assumed 
-to already contain the correctly expanded files and it will be used as is.
+NOTE: The preparation of the German conll2003-format files does not work properly right now.
+If you find the problem, please let me know or provide a pull request!
 
-## Requirements
+## Converting the CONLL-format files to GATE format
 
+Requirements:
 * Needs Java and Scala installed
 * Needs GATE 8.4.x installed and the environment variable `GATE_HOME` set to the installation directory
 * Only works on Linux, Mac and under Windows probably only in some form of Linux-compatibiity mode
 
-## Steps 
+Make sure that the CONLL-format files are in conll2003-eng or conll2003-deu as needed!
 
-* run ./prepare.sh dir1 dir2 dir3 where dir1 contains the conll2003 archives dir2 contains the LDC94T5 archive and dir3 contains the Reuters zip files
-* this creates work/ner/deu.{train,testa,testb} and work/ner/eng.{train,testa,testb}
-* NOTE: there will be a message about an incorrect number of lines in data files, but it seems this is just because of an added empty line at the end of eng.testa
-* Run ./convert.sh : this will create a directory deu and a directory eng with subdirectories train, test and testb each and populate the directories with the GATE files.
+Now run `./convert-eng.sh` to convert English files and/or ./convert-deu.sh` to convert German files.
 
 Each of the result directories contains one GATE document in GATE XML format for each document identified in the corresponding input file. 
+
+## Conversion Strategy
 
 The following annotations are placed into the annotation set "Original markups":
 * LOC, MISC, ORG, PER: for the entity annotations from the input. These annotations have the single feature startLineNr which identifies the (1-based) number of the original CoNLL input file where this entity started

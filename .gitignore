@@ -1,1 +1,9 @@
 /work
+/conll2003-deu/deu.testa
+/conll2003-deu/deu.testb
+/conll2003-deu/deu.train
+/conll2003-eng/eng.testa
+/conll2003-eng/eng.testb
+/conll2003-eng/eng.train
+/conll2003-gate-deu/
+/conll2003-gate-eng/
