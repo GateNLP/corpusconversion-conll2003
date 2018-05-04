@@ -14,9 +14,9 @@ mkdir -p conll2003-gate-deu/testb
 
 
 iconv -f iso-8859-1 -t utf-8  conll2003-deu/deu.train | \
-  scala -nobootcp -nc -cp ${GATE_HOME}/bin/gate.jar:${GATE_HOME}/lib/'*' conll2003toGate.scala conll2003-gate-deu/train
+  scala -nobootcp -nc -cp ${GATE_HOME}/bin/gate.jar:${GATE_HOME}/lib/'*' conll2003toGate.scala conll2003-gate-deu/train finf
 iconv -f iso-8859-1 -t utf-8  conll2003-deu/deu.testa | \
-  scala -nobootcp -nc -cp ${GATE_HOME}/bin/gate.jar:${GATE_HOME}/lib/'*' conll2003toGate.scala conll2003-gate-deu/testa
+  scala -nobootcp -nc -cp ${GATE_HOME}/bin/gate.jar:${GATE_HOME}/lib/'*' conll2003toGate.scala conll2003-gate-deu/testa finf
 iconv -f iso-8859-1 -t utf-8  conll2003-deu/deu.testb | \
-  scala -nobootcp -nc -cp ${GATE_HOME}/bin/gate.jar:${GATE_HOME}/lib/'*' conll2003toGate.scala conll2003-gate-deu/testb
+  scala -nobootcp -nc -cp ${GATE_HOME}/bin/gate.jar:${GATE_HOME}/lib/'*' conll2003toGate.scala conll2003-gate-deu/testb finf
 

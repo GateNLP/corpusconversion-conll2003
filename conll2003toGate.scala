@@ -2,7 +2,9 @@ import gate._
 import java.io._
 
 val patEmpty = "^\\s*$".r
-val patNewDoc = "^\\s*-DOCSTART-\\s+-X-\\s+.*$".r
+// val patNewDoc = "^\\s*-DOCSTART-\\s+-X-\\s+.*$".r
+// This docstart pattern should work for conll2003 and wikigold
+val patNewDoc = "^\\s*-DOCSTART-\\s+.*$".r
 val patLine = "\\s+"
 
 val in = scala.io.Source.fromInputStream(System.in)
@@ -13,20 +15,27 @@ case class Token(from: Int, to: Int, lemma: String, pos: String, chunkBIO: Strin
 
 case class NE(from: Int, to: Int, annType: String, startLineNr: Int) {}
 
+case class Sentence(from: Int, to: Int) {}
+
 // We use a list to store the tokens and we append at the beginning which is fast
 // Order does not matter since we will later convert those into actual GATE annotations
 var tokens = List[Token]()
 var nes = List[NE]()
+var sentences = List[Sentence]()
 
 // TODO: count the NE annotations and try to sanity check them against 
 // the original data files!!
-if(args.size != 1) {
-  System.err.println("Need one parameter: the output directory path")
+if(args.size != 2) {
+  System.err.println("Need two parameters: the output directory path, xml/finf")
   System.exit(1)
 }
 
 val outDir = new File(args(0))
-
+val format = args(1)
+if(!format.equals("xml") && !format.equals("finf")) {
+  System.err.println("Second parameter must be xml or finf")
+  System.exit(1)
+}
 
 Gate.init()
 gate.Utils.loadPlugin("Format_FastInfoset")
@@ -43,25 +52,39 @@ var lastFrom = -1
 var lastTo = -1
 var lastLineNr = -1
 var quoteOpen = true 
+var lastSentenceStart = -1
 in.getLines.foreach { line =>
   linenr += 1
   // first check if it is an empty line. If it is then add a new line character to the document
+  // this is also the end of the sentence!
   if(!patEmpty.findFirstIn(line).isEmpty) {
-    content.append("\n");
-    noSpace = true
-    lastNe = "O"    
+    // we want to ignore the empty line after a doc start
+    if(lastSentenceStart == -1) {
+      lastSentenceStart = 0
+    } else {
+      // this is an empty line after something other than a docstart
+      // add the sentence annotation
+      sentences = Sentence(lastSentenceStart,content.size) :: sentences 
+      // the new line is not part of the sentence and will get a split annotation
+      content.append("\n");
+      noSpace = true
+      lastNe = "O"   
+      lastSentenceStart = content.size
+    }
   } else if(!patNewDoc.findFirstIn(line).isEmpty) {
     // if we do have a document, write it
     if(content.size > 0) {
       docNr+=1
-      saveDoc(docNr,content.toString,tokens,nes)
+      saveDoc(docNr,content.toString,tokens,nes,sentences,format)
     }
     content = new StringBuilder()
     tokens = List[Token]()
     nes = List[NE]()
+    sentences = List[Sentence]()
     noSpace = true
     lastNe = "O"
     quoteOpen = true
+    lastSentenceStart = -1
   } else { 
     // actual line with a token in it
     val fields = line.split(patLine,-1)
@@ -91,6 +114,7 @@ in.getLines.foreach { line =>
     }
     val to = content.size
     val thisNe =
+      // Token(from: Int, to: Int, lemma: String, pos: String, chunkBIO: String, neBIO: String, lineNr: Int)
       if(fields.size==5) {
         // there is an error in the l\emma: for all forms of the german articles, the lemma is "d"!!
         tokens =  Token(from,to,fields(1),fields(2),fields(3),fields(4),linenr) :: tokens
@@ -98,6 +122,9 @@ in.getLines.foreach { line =>
       } else if (fields.size==4) {
         tokens = Token(from,to,null,fields(1),fields(2),fields(3),linenr) :: tokens
         fields(3)
+      } else if (fields.size==2) {
+        tokens = Token(from,to,null,null,null,fields(1),linenr) :: tokens
+        fields(1)
       } else {
         System.err.println("Error in line "+linenr+": number of fields is "+fields.size)
         ""
@@ -147,14 +174,12 @@ in.getLines.foreach { line =>
 // Write any non-written document
 if(content.size > 0) {
   docNr+=1
-  saveDoc(docNr,content.toString,tokens,nes)
+  saveDoc(docNr,content.toString,tokens,nes,sentences,format)
 }
 
 
 
-def saveDoc(nr: Int, content: String, tokens: List[Token], nes: List[NE]) = {
-  val docName = "%05d.finf".format(nr)
-  System.err.println("Saving document: "+docName)
+def saveDoc(nr: Int, content: String, tokens: List[Token], nes: List[NE], sentences: List[Sentence], format: String) = {
   //System.err.println("NES: "+nes)
   val parms = Factory.newFeatureMap()
   parms.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, "UTF-8")
@@ -163,6 +188,15 @@ def saveDoc(nr: Int, content: String, tokens: List[Token], nes: List[NE]) = {
   val doc = Factory.createResource("gate.corpora.DocumentImpl", parms).asInstanceOf[Document]
   // add the tokens
   val origs = doc.getAnnotations("Original markups")
+  sentences.foreach { sentence => 
+    var fm = Factory.newFeatureMap()
+    gate.Utils.addAnn(origs,sentence.from,sentence.to,"Sentence",fm)
+    fm = Factory.newFeatureMap()
+    fm.put("kind","external")
+    gate.Utils.addAnn(origs,sentence.to,sentence.to+1,"Split",fm)
+    // TODO: if the last character covered within the Sentence annotation is
+    // punctuation, we probably should also add a Split.kind="internal" annotation there.
+  }
   tokens.foreach { token =>
     val fm = Factory.newFeatureMap()
     fm.put("lemma",token.lemma)
@@ -182,7 +216,12 @@ def saveDoc(nr: Int, content: String, tokens: List[Token], nes: List[NE]) = {
     gate.Utils.addAnn(origs,ne.from, ne.to, ne.annType, fm)
   }
   // actually write the document 
-  //gate.corpora.DocumentStaxUtils.writeDocument(doc,new File(outDir,docName))
-  docExporter.export(doc,new File(outDir, docName), Factory.newFeatureMap());
+  val docName = if(format.equals("finf")) "%05d.finf".format(nr) else "%05d.xml".format(nr)
+  System.err.println("Saving document: "+docName+ " nrSentences="+sentences.size)
+  if(format.equals("xml")) {
+    gate.corpora.DocumentStaxUtils.writeDocument(doc,new File(outDir,docName))
+  } else {
+    docExporter.export(doc,new File(outDir, docName), Factory.newFeatureMap());
+  }
 }
 
